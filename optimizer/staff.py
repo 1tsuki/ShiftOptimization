@@ -88,17 +88,17 @@ class Staff:
                 else: # 勤務→勤務
                     consecutive_off_count = 0
                     consecutive_on_count += 1
-                    if CONSECUTIVE_WORK_MAX <= consecutive_on_count:
-                        return False
             else:
                 if self.is_day_off(day): # 休み→休み
                     consecutive_off_count += 1
                     consecutive_on_count = 0
-                    if not ignore_consecutive_off_check and CONSECUTIVE_OFF_MAX <= consecutive_off_count:
-                        return False
                 else: # 休み→勤務
                     consecutive_off_count = 1
                     consecutive_on_count = 0
+
+            if CONSECUTIVE_WORK_MAX <= consecutive_on_count \
+                or (not ignore_consecutive_off_check and CONSECUTIVE_OFF_MAX <= consecutive_off_count):
+                return False
         return True
 
     def print_stats(self):
