@@ -18,16 +18,16 @@ class Role(Enum):
         if self == Role.ER:
             return 15
         elif self == Role.ICU:
-            return 18
+            return 17
 
     def night_shift_assign_limit(self) -> int:
         if self == Role.ER:
             return 7
         elif self == Role.ICU:
-            return 4
+            return 3
 
 CONSECUTIVE_WORK_MAX = 5
-CONSECUTIVE_OFF_MAX = 6
+CONSECUTIVE_OFF_MAX = 4
 class Staff:
     def __init__(self, name: str, role: Role, calendar: MonthlyCalendar):
         self.name = name

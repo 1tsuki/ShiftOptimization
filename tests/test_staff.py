@@ -17,22 +17,22 @@ class TestStaff(TestCase):
             staff.assign(i+1, Section.ER)
         self.assertFalse(staff.is_valid_work_schedule())
 
-    def test_6連休はOK(self):
+    def test_4連休はOK(self):
         cal = MonthlyCalendar(2024, 4)
         staff = Staff("test", Role.ER, cal)
 
         for i in range(cal.number_of_days()):
-            if i % 10 in range(0, 6):
+            if i % (5+4) in range(0, 4):
                 staff.assign(i+1, Section.OFF)
             else:
                 staff.assign(i+1, Section.ER)
         self.assertTrue(staff.is_valid_work_schedule(False))
 
-    def test_7連休はNG(self):
+    def test_5連休はNG(self):
         cal = MonthlyCalendar(2024, 4)
         staff = Staff("test", Role.ER, cal)
         for i in range(cal.number_of_days()):
-            if i % 10 in range(0, 7):
+            if i % (5+4) in range(0, 5):
                 staff.assign(i+1, Section.OFF)
             else:
                 staff.assign(i+1, Section.ER)
@@ -61,12 +61,12 @@ class TestStaff(TestCase):
             staff.assign(i * 2 + 2, Section.OFF)
         self.assertFalse(staff.is_valid_work_schedule())
 
-    def test_ICUは夜勤4回までOK(self):
+    def test_ICUは夜勤3回までOK(self):
         cal = MonthlyCalendar(2024, 4)
         staff = Staff("test", Role.ICU, cal)
-        for i in range(5):
-            if i % 2 == 0:
-                staff.assign(i+1, Section.NER)
+        for i in range(3):
+            staff.assign(i * 2 + 1, Section.NER)
+            staff.assign(i * 2 + 2, Section.OFF)
         self.assertTrue(staff.is_valid_work_schedule())
 
     def test_ICUは夜勤5回でNG(self):
