@@ -83,7 +83,7 @@ def evaluate(staffs):
         # 総夜勤日数は上限より少ないほうが好ましい
         score += staff.role.night_shift_assign_limit() - staff.assignment_count(Section.NER)
 
-        for day in range(1, staff.calendar.number_of_days()):
+        for day in range(1, staff.calendar.number_of_days() + 1):
             # 土日の休暇は加点
             if staff.calendar.is_weekend(day) and staff.is_day_off(day):
                 score += 1

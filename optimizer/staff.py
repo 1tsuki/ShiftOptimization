@@ -68,7 +68,7 @@ class Staff:
         # 連勤/連休上限チェック + 夜勤明け勤務チェック
         consecutive_on_count = 0 if self.is_day_off(1) else 1
         consecutive_off_count = 1 if self.is_day_off(1) else 0
-        for day in range(2, self.calendar.number_of_days()):
+        for day in range(2, self.calendar.number_of_days() + 1):
             # 日またぎ制約を扱うため2日目から処理を行う
             # 夜勤明けに勤務をしていないか
             if self.work_schedule_of(day - 1) == Section.NER and not self.is_day_off(day):
