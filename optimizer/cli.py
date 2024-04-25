@@ -8,8 +8,8 @@ from optimizer.staff import Role, Staff, Section
 
 
 def generate_base_work_schedule(cal, icu_count, er_count):
-    staffs_icu = list(map(lambda i: Staff("Dr.{0}".format(str(i)), Role.ICU, cal), range(0, icu_count)))
-    staffs_er = list(map(lambda i: Staff("Dr.{0}".format(str(i)), Role.ER, cal), range(0, er_count)))
+    staffs_icu = list(map(lambda i: Staff("ICU.{0}".format(str(i+1)), Role.ICU, cal), range(0, icu_count)))
+    staffs_er = list(map(lambda i: Staff("ER.{0}".format(str(i+1)), Role.ER, cal), range(0, er_count)))
     return assign(cal, staffs_icu, staffs_er)
 
 def assign(cal, staffs_icu: list, staffs_er: list):
@@ -159,9 +159,9 @@ def main():
         new_score = evaluate(modified)
         if all([staff.is_valid_work_schedule(False) for staff in modified]) and prev_score <= new_score:
             work_schedule = modified
-            prev_score = new_score
             swapped += 1
             if prev_score < new_score:
+                prev_score = new_score
                 improved += 1
 
     print('swapped {0} and improved {1} times in {2} attempts, final score = {3}'.format(swapped, improved, max_attempt, evaluate(work_schedule)))
