@@ -88,18 +88,17 @@ class Staff:
                 else: # 勤務→勤務
                     consecutive_off_count = 0
                     consecutive_on_count += 1
+                    if CONSECUTIVE_WORK_MAX <= consecutive_on_count:
+                        return False
             else:
                 if self.is_day_off(day): # 休み→休み
                     consecutive_off_count += 1
                     consecutive_on_count = 0
+                    if not ignore_consecutive_off_check and CONSECUTIVE_OFF_MAX <= consecutive_off_count:
+                        return False
                 else: # 休み→勤務
                     consecutive_off_count = 1
                     consecutive_on_count = 0
-
-            # 連勤/連休上限エラー
-            if CONSECUTIVE_WORK_MAX <= consecutive_on_count \
-                or (not ignore_consecutive_off_check and CONSECUTIVE_OFF_MAX <= consecutive_off_count):
-                return False
         return True
 
     def print_stats(self):
@@ -107,12 +106,30 @@ class Staff:
 
     def print_work_schedule(self):
         print(self.name, end='\t')
+
+        day = 1
         for section in self.work_schedule[Shift.DAY]:
+            if self.calendar.is_weekend(day):
+                print('\033[44m', end='')
+            if section == Section.OFF:
+                print('\033[08m', end='')
             print(section.name, end='\t')
+            print('\033[0m', end='')
+
+            day += 1
         print()
 
+        day = 1
         print(' {0}'.format(self.role.name), end='\t')
         for section in self.work_schedule[Shift.NIGHT]:
+            print('\033[31m', end='')
+            if self.calendar.is_weekend(day):
+                print('\033[44m', end='')
+            if section == Section.OFF:
+                print('\033[08m', end='')
             print(section.name, end='\t')
+            print('\033[0m', end='')
+
+            day += 1
         print()
 
