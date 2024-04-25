@@ -163,23 +163,29 @@ def main():
     month = input('Month: ') if not debug else 4
     icu_count = input('ICU count: ') if not debug else 5
     er_count = input('ER count: ') if not debug else 15
-    max_attempt = input('Max attempt: ') if not debug else 1000
+    max_attempt = input('Max attempt: ') if not debug else 10000
 
     cal = MonthlyCalendar(year, month)
     work_schedule = generate_base_work_schedule(cal, icu_count, er_count)
     print('initial score = {0}'.format(evaluate(work_schedule)))
 
     attempt = 0
+    swapped = 0
     improved = 0
+    prev_score = evaluate(work_schedule)
     while attempt < max_attempt:
         attempt += 1
         modified = deepcopy(work_schedule)
         modify(modified, cal)
-        if all([staff.is_valid_work_schedule(False) for staff in modified]) and evaluate(modified) > evaluate(work_schedule):
-            work_schedule = modified
-            improved += 1
 
-    print('improved {0} times in {1} attempts, final score = {2}'.format(improved, max_attempt, evaluate(work_schedule)))
+        new_score = evaluate(modified)
+        if all([staff.is_valid_work_schedule(False) for staff in modified]) and prev_score <= new_score:
+            work_schedule = modified
+            swapped += 1
+            if prev_score < new_score:
+                improved += 1
+
+    print('swapped {0} and improved {1} times in {2} attempts, final score = {3}'.format(swapped, improved, max_attempt, evaluate(work_schedule)))
 
     for staff in work_schedule:
         staff.print_stats()
