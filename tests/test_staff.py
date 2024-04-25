@@ -76,3 +76,36 @@ class TestStaff(TestCase):
             staff.assign(i * 2 + 1, Section.NER)
             staff.assign(i * 2 + 2, Section.OFF)
         self.assertFalse(staff.is_valid_work_schedule())
+
+    def test_ICUはERに配属できない(self):
+        cal = MonthlyCalendar(2024, 4)
+        staff = Staff("test", Role.ICU, cal)
+        staff.assign(1, Section.ER)
+        self.assertFalse(staff.is_valid_work_schedule())
+
+    def test_ICUはEICUに配属できない(self):
+        cal = MonthlyCalendar(2024, 4)
+        staff = Staff("test", Role.ICU, cal)
+        staff.assign(1, Section.EICU)
+        self.assertFalse(staff.is_valid_work_schedule())
+
+    def test_ICUはICUとNERに配属可能(self):
+        cal = MonthlyCalendar(2024, 4)
+        staff = Staff("test", Role.ICU, cal)
+        staff.assign(1, Section.ICU)
+        staff.assign(2, Section.NER)
+        self.assertTrue(staff.is_valid_work_schedule())
+
+    def test_ERはICUに配属できない(self):
+        cal = MonthlyCalendar(2024, 4)
+        staff = Staff("test", Role.ER, cal)
+        staff.assign(1, Section.ICU)
+        self.assertFalse(staff.is_valid_work_schedule())
+
+    def test_ERはERとEICUとNERに配属可能(self):
+        cal = MonthlyCalendar(2024, 4)
+        staff = Staff("test", Role.ER, cal)
+        staff.assign(1, Section.ER)
+        staff.assign(2, Section.EICU)
+        staff.assign(2, Section.NER)
+        self.assertTrue(staff.is_valid_work_schedule())

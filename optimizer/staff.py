@@ -65,6 +65,12 @@ class Staff:
         if self.role.day_shift_assign_limit() < (self.assignment_count(Section.ER) + self.assignment_count(Section.ICU) + self.assignment_count(Section.EICU)):
             return False
 
+        if self.role == Role.ER and self.assignment_count(Section.ICU) > 0:
+            return False
+
+        if self.role == Role.ICU and self.assignment_count(Section.ER) + self.assignment_count(Section.EICU) > 0:
+            return False
+
         # 連勤/連休上限チェック + 夜勤明け勤務チェック
         consecutive_on_count = 0 if self.is_day_off(1) else 1
         consecutive_off_count = 1 if self.is_day_off(1) else 0
