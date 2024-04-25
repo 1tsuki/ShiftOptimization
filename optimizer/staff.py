@@ -100,7 +100,7 @@ class Staff:
             self.name, 
             self.role.name, 
             self.assignment_count(Section.ER) + self.assignment_count(Section.ICU) + self.assignment_count(Section.EICU), 
-            self.assignment_count(Section.ER)))
+            self.assignment_count(Section.NER)))
 
     def print_work_schedule(self):
         print(self.name, end='\t')
