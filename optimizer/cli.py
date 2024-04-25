@@ -95,7 +95,6 @@ def evaluate(staffs):
             # 同種連日勤務は加点
             if 2 <= day and staff.work_schedule_of(day) in [Section.ICU, Section.EICU] and staff.work_schedule_of(day - 1) == staff.work_schedule_of(day):
                 score += 1
-        return score
 
     # 全体観点でのシフトの質
     day_shift_dev = stdev([staff.assignment_count(Section.ER) + staff.assignment_count(Section.ICU) + staff.assignment_count(Section.EICU) for staff in staffs])
