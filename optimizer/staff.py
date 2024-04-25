@@ -65,9 +65,10 @@ class Staff:
         if self.role.day_shift_assign_limit() < (self.assignment_count(Section.ER) + self.assignment_count(Section.ICU) + self.assignment_count(Section.EICU)):
             return False
 
+        # ERはICUに配属しない
         if self.role == Role.ER and self.assignment_count(Section.ICU) > 0:
             return False
-
+        # ICUはER,EICUに配属しない
         if self.role == Role.ICU and self.assignment_count(Section.ER) + self.assignment_count(Section.EICU) > 0:
             return False
 
