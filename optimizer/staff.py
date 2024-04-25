@@ -7,6 +7,7 @@ class Section(Enum):
     ER = 'ER'
     ICU = 'ICU'
     EICU = 'EICU'
+    NER = 'NER'
     OFF = None
 
 class Role(Enum):
@@ -25,10 +26,6 @@ class Role(Enum):
         elif self == Role.ICU:
             return 4
 
-class Shift(Enum):
-    DAY = 'DAY'
-    NIGHT = 'NIGHT'
-
 CONSECUTIVE_WORK_MAX = 5
 CONSECUTIVE_OFF_MAX = 6
 class Staff:
@@ -37,36 +34,35 @@ class Staff:
         self.role = role
         self.calendar = calendar
         self.work_schedule = {}
-        for shift in Shift:
-            self.work_schedule[shift] = [Section.OFF] * calendar.number_of_days()
+        self.work_schedule = [Section.OFF] * calendar.number_of_days()
 
-    def assign(self, day: int, shift: Shift, section: Section) -> None:
-        self.work_schedule[shift][day - 1] = section
+    def assign(self, day: int, section: Section) -> None:
+        self.work_schedule[day - 1] = section
 
-    def can_assign(self, day: int, shift: Shift, section: Section) -> bool:
+    def can_assign(self, day: int, section: Section) -> bool:
+        if self.work_schedule_of(day) != Section.OFF:
+            return False
         after_assign = deepcopy(self)
-        after_assign.assign(day, shift, section)
+        after_assign.assign(day, section)
         return after_assign.is_valid_work_schedule()
 
-    def assignment_count(self, shift: Shift) -> int:
-        return len(list(filter(lambda s: s != Section.OFF, self.work_schedule[shift])))
+    def assignment_count(self, section: Section) -> int:
+        return len(list(filter(lambda s: s == section, self.work_schedule)))
 
-    def work_schedule_of(self, day: int, shift: Shift) -> Section:
-        return self.work_schedule[shift][day - 1]
+    def work_schedule_of(self, day: int) -> Section:
+        return self.work_schedule[day - 1]
 
     def is_day_off(self, day: int) -> bool:
         # 当日昼夜及び前日夜にシフトがない場合、休暇として扱う
-        return self.work_schedule_of(day, Shift.DAY) == Section.OFF \
-            and self.work_schedule_of(day, Shift.NIGHT) == Section.OFF \
-            and (2 <= day and self.work_schedule_of(day - 1, Shift.NIGHT) == Section.OFF)
+        return self.work_schedule_of(day) == Section.OFF
 
     def is_valid_work_schedule(self, ignore_consecutive_off_check = True) -> bool:
         # シフト生成初期は全日程が休日扱いのため、シフト生成中は連休上限チェックをスキップする必要がある
 
         # 日勤夜勤回数上限チェック
-        if self.role.night_shift_assign_limit() < self.assignment_count(Shift.NIGHT):
+        if self.role.night_shift_assign_limit() < self.assignment_count(Section.NER):
             return False
-        if self.role.day_shift_assign_limit() < self.assignment_count(Shift.DAY):
+        if self.role.day_shift_assign_limit() < (self.assignment_count(Section.ER) + self.assignment_count(Section.ICU) + self.assignment_count(Section.EICU)):
             return False
 
         # 連勤/連休上限チェック + 夜勤明け勤務チェック
@@ -75,9 +71,7 @@ class Staff:
         for day in range(2, self.calendar.number_of_days()):
             # 日またぎ制約を扱うため2日目から処理を行う
             # 夜勤明けに勤務をしていないか
-            if not self.work_schedule_of(day - 1, Shift.NIGHT) == Section.OFF \
-                and (not self.work_schedule_of(day, Shift.DAY) == Section.OFF \
-                     or not self.work_schedule_of(day, Shift.NIGHT) == Section.OFF):
+            if self.work_schedule_of(day - 1) == Section.NER and not self.is_day_off(day):
                 return False
 
             # 連続勤務/休暇日数の計算
@@ -102,34 +96,25 @@ class Staff:
         return True
 
     def print_stats(self):
-        print("{0}\tRole:{1}\tday_assignment_count:{2}\tnight_assignment_count:{3}".format(self.name, self.role.name, self.assignment_count(Shift.DAY), self.assignment_count(Shift.NIGHT)))
+        print("{0}\tRole:{1}\tday_assignment_count:{2}\tnight_assignment_count:{3}".format(
+            self.name, 
+            self.role.name, 
+            self.assignment_count(Section.ER) + self.assignment_count(Section.ICU) + self.assignment_count(Section.EICU), 
+            self.assignment_count(Section.ER)))
 
     def print_work_schedule(self):
         print(self.name, end='\t')
 
         day = 1
-        for section in self.work_schedule[Shift.DAY]:
+        for section in self.work_schedule:
             if self.calendar.is_weekend(day):
                 print('\033[44m', end='')
             if section == Section.OFF:
                 print('\033[08m', end='')
+            if section == Section.NER:
+                print('\033[31m', end='')
             print(section.name, end='\t')
             print('\033[0m', end='')
 
             day += 1
         print()
-
-        day = 1
-        print(' {0}'.format(self.role.name), end='\t')
-        for section in self.work_schedule[Shift.NIGHT]:
-            print('\033[31m', end='')
-            if self.calendar.is_weekend(day):
-                print('\033[44m', end='')
-            if section == Section.OFF:
-                print('\033[08m', end='')
-            print(section.name, end='\t')
-            print('\033[0m', end='')
-
-            day += 1
-        print()
-

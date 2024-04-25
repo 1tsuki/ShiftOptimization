@@ -13,3 +13,9 @@ class MonthlyCalendar:
 
     def is_weekend(self, day: int) -> bool:
         return not self.is_weekday(day)
+
+    def print_dates(self):
+        print('{0}月'.format(self.month), end='\t')
+        for day in range(1, self.number_of_days() + 1):
+            print(day, end='\t')
+        print()
