@@ -25,8 +25,8 @@ def assign_night_shift(cal, staffs_icu, staffs_er, idx = 0, day = 1):
 
     # 夜勤ER割当
     for i in range(NIGHT_ER_STAFF_REQUIRED):
-        idx = find_next_assignable(day, idx, staffs_icu + staffs_er, Shift.NIGHT, Section.ER)
-        staff = staffs_icu[idx] if idx < len(staffs_icu) else staffs_er[idx - len(staffs_icu)]
+        idx = find_next_assignable(day, idx, staffs_er + staffs_icu, Shift.NIGHT, Section.ER)
+        staff = staffs_er[idx] if idx < len(staffs_er) else staffs_icu[idx - len(staffs_er)]
         staff.assign(day, Shift.NIGHT, Section.ER)
         idx = increment_idx(idx, len(staffs_icu) + len(staffs_er))
 
@@ -111,14 +111,13 @@ def evaluate(staffs):
 def modify(staffs, cal: MonthlyCalendar):
     # ランダムな日を抽出
     day = randint(1, cal.number_of_days())
-    swap_night_shift(staffs, day)
-    swap_day_shift(staffs, day)
+    if randint(0, 1) == 0:
+        swap_night_shift(staffs, day)
+    else:
+        swap_day_shift(staffs, day)
 
-    return staffs
-
-def get_random_staff_assigned(staffs, day: int, shift:Shift):
-    assigned = [staff for staff in staffs if staff.work_schedule_of(day, shift) != Section.OFF]
-    return choice(assigned)
+def get_staff_assigned(staffs, day: int, shift:Shift):
+    return [staff for staff in staffs if staff.work_schedule_of(day, shift) != Section.OFF]
 
 def get_staffs_unassigned(staffs, day: int, shift:Shift, role: Role = None):
     if role == None:
@@ -128,7 +127,8 @@ def get_staffs_unassigned(staffs, day: int, shift:Shift, role: Role = None):
 
 def swap_night_shift(staffs, day):
     # 夜勤の人を探す
-    staff_a = get_random_staff_assigned(staffs, day, Shift.NIGHT)
+    assigned = get_staff_assigned(staffs, day, Shift.NIGHT)
+    staff_a = choice(assigned)
 
     # 夜勤に入れる人を探す
     unassigned = get_staffs_unassigned(staffs, day, Shift.NIGHT)
@@ -141,7 +141,8 @@ def swap_night_shift(staffs, day):
 
 def swap_day_shift(staffs, day):
     # 日勤の人を探す
-    staff_a = get_random_staff_assigned(staffs, day, Shift.DAY)
+    assigned = get_staff_assigned(staffs, day, Shift.DAY)
+    staff_a = choice(assigned)
     assignment = staff_a.work_schedule_of(day, Shift.DAY)
 
     # 同一シフトの別人物を探す
@@ -161,60 +162,29 @@ def main():
     year = input('Year: ') if not debug else 2024
     month = input('Month: ') if not debug else 4
     icu_count = input('ICU count: ') if not debug else 5
-    er_count = input('ER count: ') if not debug else 20
-    attempts = input('Attempt count: ') if not debug else 10000
+    er_count = input('ER count: ') if not debug else 15
+    max_attempt = input('Max attempt: ') if not debug else 1000
 
     cal = MonthlyCalendar(year, month)
     work_schedule = generate_base_work_schedule(cal, icu_count, er_count)
     print('initial score = {0}'.format(evaluate(work_schedule)))
 
-    count = 0
+    attempt = 0
     improved = 0
-    while count < attempts:
-        count += 1
-        # deep copy base_shift
-        modified = modify(deepcopy(work_schedule), cal)
-        if evaluate(modified) > evaluate(work_schedule) and all([staff.is_valid_work_schedule(False) for staff in modified]):
-            improved += 1
+    while attempt < max_attempt:
+        attempt += 1
+        modified = deepcopy(work_schedule)
+        modify(modified, cal)
+        if all([staff.is_valid_work_schedule(False) for staff in modified]) and evaluate(modified) > evaluate(work_schedule):
             work_schedule = modified
-    print('improved {0} times in {1} attempts, final score = {2}'.format(improved, attempts, evaluate(work_schedule)))
+            improved += 1
+
+    print('improved {0} times in {1} attempts, final score = {2}'.format(improved, max_attempt, evaluate(work_schedule)))
+
+    for staff in work_schedule:
+        staff.print_stats()
+    print()
 
     for staff in work_schedule:
         staff.print_work_schedule()
     print()
-
-    day_icu_counts = []
-    day_er_counts = []
-    day_eicu_counts = []
-    night_er_counts = []
-    for day in range(1, cal.number_of_days() + 1):
-        day_icu_counts.append(assigned_count(work_schedule, day, Shift.DAY, Section.ICU))
-        day_er_counts.append(assigned_count(work_schedule, day, Shift.DAY, Section.ER))
-        day_eicu_counts.append(assigned_count(work_schedule, day, Shift.DAY, Section.EICU))
-        night_er_counts.append(assigned_count(work_schedule, day, Shift.NIGHT, Section.ER))
-
-    print('D ICU', end='\t')
-    for count in day_icu_counts:
-        print(count, end='\t')
-    print()
-
-    print('D ER', end='\t')
-    for count in day_er_counts:
-        print(count, end='\t')
-    print()
-
-    print('D EICU', end='\t')
-    for count in day_eicu_counts:
-        print(count, end='\t')
-    print()
-
-    print('N ER', end='\t')
-    for count in night_er_counts:
-        print(count, end='\t')
-    print()
-
-
-    for staff in work_schedule:
-        staff.print_stats()
-
-    print('Validity: {0}'.format(all([staff.is_valid_work_schedule(True) for staff in work_schedule])))
