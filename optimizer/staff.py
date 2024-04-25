@@ -102,11 +102,19 @@ class Staff:
         return True
 
     def print_stats(self):
-        print("{0}\tRole:{1}\tday_assignment_count:{2}\tnight_assignment_count:{3}".format(
-            self.name,
-            self.role.name,
-            self.assignment_count(Section.ER) + self.assignment_count(Section.ICU) + self.assignment_count(Section.EICU), 
-            self.assignment_count(Section.NER)))
+        print(self.name, end='\t')
+        print(self.role.name, end='\t')
+        if self.role == Role.ER:
+            print('{0}: {1}'.format(Section.NER.name, self.assignment_count(Section.NER)), end='\t')
+            print('{0}: {1}'.format(Section.ER.name, self.assignment_count(Section.ER)), end='\t')
+            print('{0}: {1}'.format(Section.EICU.name, self.assignment_count(Section.EICU)), end='\t')
+        elif self.role == Role.ICU:
+            print('{0}: {1}'.format(Section.NER.name, self.assignment_count(Section.NER)), end='\t')
+            print('{0}: {1}'.format(Section.ICU.name, self.assignment_count(Section.ICU)), end='\t')
+        else:
+            for section in list(Section):
+                print('{0}: {1}'.format(section.name, self.assignment_count(section)), end='\t')
+        print()
 
     def print_work_schedule(self):
         print(self.name, end='\t')
