@@ -122,8 +122,9 @@ def swap_shift(staffs, day: int, section: Section):
     assigned = get_staff_assigned(staffs, day, section)
     staff_a = choice(assigned)
 
-    # 夜勤に入れる人を探す
-    unassigned = get_staffs_unassigned(staffs, day)
+    # 勤務に入れる人を探す
+    role = Role.ICU if section == Section.ICU else (Role.ER if section in [Section.ER, Section.EICU] else None)
+    unassigned = get_staffs_unassigned(staffs, day, role)
     shuffle(unassigned)
     for staff_b in unassigned:
         if staff_b.can_assign(day, section):
