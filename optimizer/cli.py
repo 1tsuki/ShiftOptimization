@@ -97,10 +97,15 @@ def evaluate(staffs):
                 score += 1
 
     # 全体観点でのシフトの質
-    day_shift_dev = stdev([staff.assignment_count(Section.ER) + staff.assignment_count(Section.ICU) + staff.assignment_count(Section.EICU) for staff in staffs])
-    night_shift_dev = stdev([staff.assignment_count(Section.NER) for staff in staffs])
+    er_staffs = [staff for staff in staffs if staff.role == Role.ER]
+    icu_staffs = [staff for staff in staffs if staff.role == Role.ICU]
 
-    return score - day_shift_dev * 20 - night_shift_dev * 20
+    er_day_shift_dev = stdev([staff.assignment_count(Section.ER) + staff.assignment_count(Section.ICU) + staff.assignment_count(Section.EICU) for staff in er_staffs])
+    er_night_shift_dev = stdev([staff.assignment_count(Section.NER) for staff in er_staffs])
+    icu_day_shift_dev = stdev([staff.assignment_count(Section.ER) + staff.assignment_count(Section.ICU) + staff.assignment_count(Section.EICU) for staff in icu_staffs])
+    icu_night_shift_dev = stdev([staff.assignment_count(Section.NER) for staff in icu_staffs])
+
+    return score - er_day_shift_dev * len(er_staffs) - er_night_shift_dev * len(er_staffs) - icu_day_shift_dev * len(icu_staffs) - icu_night_shift_dev * len(icu_staffs)
 
 def modify(staffs, cal: MonthlyCalendar):
     # ランダムな日を抽出
