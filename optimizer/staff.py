@@ -87,18 +87,18 @@ class Staff:
                     consecutive_off_count += 1
                     consecutive_on_count = 0
                 else: # 休み→勤務
-                    consecutive_off_count = 1
-                    consecutive_on_count = 0
+                    consecutive_off_count = 0
+                    consecutive_on_count = 1
 
-            if CONSECUTIVE_WORK_MAX <= consecutive_on_count \
-                or (not ignore_consecutive_off_check and CONSECUTIVE_OFF_MAX <= consecutive_off_count):
+            if CONSECUTIVE_WORK_MAX < consecutive_on_count \
+                or (not ignore_consecutive_off_check and CONSECUTIVE_OFF_MAX < consecutive_off_count):
                 return False
         return True
 
     def print_stats(self):
         print("{0}\tRole:{1}\tday_assignment_count:{2}\tnight_assignment_count:{3}".format(
-            self.name, 
-            self.role.name, 
+            self.name,
+            self.role.name,
             self.assignment_count(Section.ER) + self.assignment_count(Section.ICU) + self.assignment_count(Section.EICU), 
             self.assignment_count(Section.NER)))
 
