@@ -23,6 +23,7 @@ def main(year: int, month: int, er_count: int, icu_count: int, max_attempt: int)
         # ランダム進化したシフトを生成
         modified = Modifier(work_schedule).modify()
         new_score = Evaluator.evaluate(modified)
+        print('attempt:{0}, current score:{1}'.format(attempt, current_score))
 
         # スコアが同値以上ならば変化を受容
         if current_score <= new_score:
