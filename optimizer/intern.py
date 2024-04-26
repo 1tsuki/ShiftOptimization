@@ -68,7 +68,7 @@ class Intern:
     def get_work_schedule_range(self):
         start_date = self.get_first_schedule()
         last_date = self.get_last_schedule()
-        return [start_date + datetime.timedelta(days=x) for x in range((last_date-start_date).days)]
+        return [start_date + datetime.timedelta(days=x) for x in range((last_date-start_date).days + 1)]
 
     def is_valid_work_schedule(self, in_progress = False) -> bool:
         if self.role == Role.ER:
