@@ -14,6 +14,9 @@ Python3 実行環境が必要
   - `--attempt 1000` or `-a 1000`
 - コマンド実行例 `python3 -m optimizer -y 2024 -m 4 -e 15 -i 5 -a 10000`
 
+- 有給取得希望は `optimizer/__main__.py` にて pto_requests を追加すれば処理可能
+  - 指定の I/F が要改善だが一旦動く
+
 ## Development
 
 - `python3 -m unittest discover tests` でテスト実行
