@@ -9,6 +9,7 @@ class Section(Enum):
     EICU = 'EICU'
     NER = 'NER'
     OFF = None
+    PTO = 'PTO'
 
 class Role(Enum):
     ER = 'ER'
@@ -26,9 +27,9 @@ class Intern:
 
     def can_assign(self, date: datetime.date, section: Section, in_progress = False) -> bool:
         # Roleに応じたSection配属可否チェック
-        if self.role == Role.ER and section not in [Section.ER, Section.EICU, Section.NER, Section.OFF]:
+        if self.role == Role.ER and section not in [Section.ER, Section.EICU, Section.NER, Section.OFF, Section.PTO]:
             return False
-        if self.role == Role.ICU and section not in [Section.ICU, Section.NER, Section.OFF]:
+        if self.role == Role.ICU and section not in [Section.ICU, Section.NER, Section.OFF, Section.PTO]:
             return False
 
         # シフト整合担保のため、Section割り当て済みの場合はOFF以外許容しない
@@ -57,7 +58,7 @@ class Intern:
         return len([date for date, assigned in self.work_schedule.items() if assigned == section and start_date <= date <= end_date ])
 
     def is_day_off(self, date: datetime.date) -> bool:
-        return self.assign_of(date) == Section.OFF
+        return self.assign_of(date) in [Section.OFF, Section.PTO]
 
     def get_first_schedule(self):
         return sorted(self.work_schedule.keys())[0]
