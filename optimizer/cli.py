@@ -1,5 +1,4 @@
 import calendar
-import random
 import datetime
 from optimizer.evaluator import Evaluator
 from optimizer.intern import NIGHT_ASSIGN_LIMIT_ER, NIGHT_ASSIGN_LIMIT_ICU, Role, Section
@@ -17,7 +16,7 @@ def main():
 
     # 初期シフトの生成
     start_date = datetime.date(year, month, 1)
-    end_date = datetime.date(year, month, calendar.monthrange(year, month)[1])
+    end_date = start_date + datetime.timedelta(days=calendar.monthrange(year, month)[1])
 
     work_schedule = Scheduler(er_count, icu_count).schedule(start_date, end_date)
     current_score = Evaluator.evaluate(work_schedule)
@@ -48,20 +47,25 @@ def main():
         intern.print_stats()
     print()
 
+    is_first = True
+    for date in work_schedule[0].get_work_schedule_range():
+        if is_first:
+            print('{0}月'.format(date.month), end='\t')
+            is_first = False
+
+        print(date.day, end='\t')
+    print()
+
     for intern in work_schedule:
         print(intern.name, end='\t')
 
         for date in intern.get_work_schedule_range():
             section = intern.assign_of(date)
-
-            # 週末は青背景
-            if date.weekday() in [5, 6]:
+            if date.weekday() in [5, 6]: # 週末は青背景
                 print('\033[44m', end='')
-            # 夜勤は赤文字
-            if section == Section.NER:
+            if section == Section.NER: # 夜勤は赤文字
                 print('\033[31m', end='')
-            # オフ日は非表示
-            if section == Section.OFF:
+            if section == Section.OFF: # オフ日は非表示
                 print('\033[08m', end='')
             print('{:4}'.format(section.name), end='\t')
             print('\033[0m', end='')
