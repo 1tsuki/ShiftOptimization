@@ -32,11 +32,17 @@ class Scheduler:
         self.interns += list(map(lambda i: Intern("ICU.{0}".format(str(i)), Role.ICU), range(1, icu_count + 1)))
 
     def schedule(self, start_date: datetime.date, end_date: datetime.date):
-        for intern in self.interns:
-            for date in [start_date + datetime.timedelta(days=x) for x in range((end_date-start_date).days + 1)]:
-                intern.assign(date, Section.OFF)
+        for i in range(0,10):
+            try:
+                for intern in self.interns:
+                    for date in [start_date + datetime.timedelta(days=x) for x in range((end_date-start_date).days + 1)]:
+                        intern.assign(date, Section.OFF)
+                self.assign(start_date, end_date)
+            except Exception:
+                print('failed to schedule initial work schedule, retrying... count:{0}'.format(i + 1))
+                continue
+            break
 
-        self.assign(start_date, end_date)
         return self.interns
 
     def assign(self, current_date: datetime.date, end_date: datetime.date, er_idx = 0, icu_idx = 0, ner_idx = 0):

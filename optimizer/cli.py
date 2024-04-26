@@ -6,14 +6,7 @@ from optimizer.modifier import Modifier
 from optimizer.scheduler import Scheduler
 
 
-def main():
-    debug = True
-    year = input('Year: ') if not debug else 2024
-    month = input('Month: ') if not debug else 4
-    er_count = input('ER count: ') if not debug else 15
-    icu_count = input('ICU count: ') if not debug else 5
-    max_attempt = input('Max attempt: ') if not debug else 1000
-
+def main(year: int, month: int, er_count: int, icu_count: int, max_attempt: int):
     # 初期シフトの生成
     start_date = datetime.date(year, month, 1)
     end_date = start_date + datetime.timedelta(days=calendar.monthrange(year, month)[1])
