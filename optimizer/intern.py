@@ -113,20 +113,3 @@ class Intern:
             for section in list(Section):
                 print('{0}: {1}'.format(section.name, self.assign_count(section)), end='\t')
         print()
-
-    def print_work_schedule(self):
-        print(self.name, end='\t')
-
-        day = 1
-        for section in self.work_schedule:
-            if self.calendar.is_weekend(day):
-                print('\033[44m', end='')
-            if section == Section.OFF:
-                print('\033[08m', end='')
-            if section == Section.NER:
-                print('\033[31m', end='')
-            print(section.name, end='\t')
-            print('\033[0m', end='')
-
-            day += 1
-        print()
