@@ -9,7 +9,7 @@ parser.add_argument('-y', '--year', type=int, default=datetime.datetime.now().ye
 parser.add_argument('-m', '--month', type=int, default=datetime.datetime.now().month, help='target month to generate shift')
 parser.add_argument('-e', '--er_count', type=int, default=15, help='number of ER interns')
 parser.add_argument('-i', '--icu_count', type=int, default=5, help='number of ICU interns')
-parser.add_argument('-a', '--max_attempt', type=int, default=1000, help='max attempt to improve shift')
+parser.add_argument('-a', '--max_attempt', type=int, default=5000, help='max attempt to improve shift')
 
 args = parser.parse_args()
 
