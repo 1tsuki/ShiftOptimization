@@ -1,4 +1,4 @@
-from datetime import timedelta
+import datetime
 from optimizer.intern import NIGHT_ASSIGN_LIMIT_ER, NIGHT_ASSIGN_LIMIT_ICU, Role, Section
 from statistics import stdev
 
@@ -34,20 +34,21 @@ class Evaluator:
                     score += 1
 
                 # 連続休暇は加点
-                if intern.is_day_off(date - timedelta(days=1)) and intern.is_day_off(date):
+                if intern.is_day_off(date - datetime.timedelta(days=1)) and intern.is_day_off(date):
                     score += 1
 
                 # 同種連日勤務は加点
-                if intern.assign_of(date - timedelta(days=1)) == intern.assign_of(date):
+                if intern.assign_of(date - datetime.timedelta(days=1)) == intern.assign_of(date):
                     score += 1
 
         # 全体観点でのシフトの質
         er_interns = [intern for intern in interns if intern.role == Role.ER]
         icu_interns = [intern for intern in interns if intern.role == Role.ICU]
 
-        er_day_shift_dev = stdev([intern.total_assign_count(Section.ER) + intern.total_assign_count(Section.ICU) + intern.total_assign_count(Section.EICU) for intern in er_interns])
-        er_night_shift_dev = stdev([intern.total_assign_count(Section.NER) for intern in er_interns])
-        icu_day_shift_dev = stdev([intern.total_assign_count(Section.ER) + intern.total_assign_count(Section.ICU) + intern.total_assign_count(Section.EICU) for intern in icu_interns])
-        icu_night_shift_dev = stdev([intern.total_assign_count(Section.NER) for intern in icu_interns])
+        # ER、ICUの日勤、夜勤のバラつきが少ないほうが好ましい
+        score -= stdev([intern.total_assign_count(Section.ER) + intern.total_assign_count(Section.ICU) + intern.total_assign_count(Section.EICU) for intern in er_interns]) * 100
+        score -= stdev([intern.total_assign_count(Section.NER) for intern in er_interns]) * 100
+        score -= stdev([intern.total_assign_count(Section.ER) + intern.total_assign_count(Section.ICU) + intern.total_assign_count(Section.EICU) for intern in icu_interns]) * 100
+        score -= stdev([intern.total_assign_count(Section.NER) for intern in icu_interns]) * 100
 
-        return score - er_day_shift_dev * len(er_interns) - er_night_shift_dev * len(er_interns) - icu_day_shift_dev * len(icu_interns) - icu_night_shift_dev * len(icu_interns)
+        return score

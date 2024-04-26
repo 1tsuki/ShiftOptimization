@@ -1,7 +1,7 @@
 import calendar
 from enum import Enum
 from copy import deepcopy
-from datetime import date, datetime, timedelta
+import datetime
 
 class Section(Enum):
     ER = 'ER'
@@ -24,7 +24,7 @@ class Intern:
         self.role = role
         self.work_schedule = {}
 
-    def can_assign(self, date: date, section: Section, in_progress = False) -> bool:
+    def can_assign(self, date: datetime.date, section: Section, in_progress = False) -> bool:
         # Roleに応じたSection配属可否チェック
         if self.role == Role.ER and section not in [Section.ER, Section.EICU, Section.NER, Section.OFF]:
             return False
@@ -40,10 +40,10 @@ class Intern:
         after_assign.assign(date, section)
         return after_assign.is_valid_work_schedule(in_progress)
 
-    def assign(self, date: date, section: Section) -> None:
+    def assign(self, date: datetime.date, section: Section) -> None:
         self.work_schedule[date] = section
 
-    def assign_of(self, date: date) -> Section:
+    def assign_of(self, date: datetime.date) -> Section:
         if date not in self.work_schedule:
             return Section.OFF
         return self.work_schedule[date]
@@ -52,16 +52,11 @@ class Intern:
         return len([date for date, assigned in self.work_schedule.items() if assigned == section])
 
     def monthly_assign_count(self, year: int, month: int, section: Section) -> int:
-        start_date = datetime(year, month, 1)
-        end_date = datetime(year, month, calendar.monthrange(year, month)[1])
+        start_date = datetime.date(year, month, 1)
+        end_date = start_date + datetime.timedelta(days=calendar.monthrange(year, month)[1])
+        return len([date for date, assigned in self.work_schedule.items() if assigned == section and start_date <= date <= end_date ])
 
-        count = 0
-        for date in [start_date + timedelta(days=x) for x in range((end_date-start_date).days)]: 
-            count += 1 if self.assign_of(date) == section else 0
-
-        return count
-
-    def is_day_off(self, date: date) -> bool:
+    def is_day_off(self, date: datetime.date) -> bool:
         return self.assign_of(date) == Section.OFF
 
     def get_first_schedule(self):
@@ -73,7 +68,7 @@ class Intern:
     def get_work_schedule_range(self):
         start_date = self.get_first_schedule()
         last_date = self.get_last_schedule()
-        return [start_date + timedelta(days=x) for x in range((last_date-start_date).days)]
+        return [start_date + datetime.timedelta(days=x) for x in range((last_date-start_date).days)]
 
     def is_valid_work_schedule(self, in_progress = False) -> bool:
         if self.role == Role.ER:
@@ -100,7 +95,7 @@ class Intern:
 
         for date in self.get_work_schedule_range():
             # 夜勤明けに勤務をしていないか
-            if self.assign_of(date - timedelta(days=1)) == Section.NER and not self.is_day_off(date):
+            if self.assign_of(date - datetime.timedelta(days=1)) == Section.NER and not self.is_day_off(date):
                 return False
 
             # 連続勤務/休暇日数の計算

@@ -1,5 +1,5 @@
-from datetime import date
 import random
+import datetime
 from copy import deepcopy
 from optimizer.intern import Role, Section
 
@@ -28,14 +28,14 @@ class Modifier:
 
         return self.interns
 
-    def find_assigned(self, date: date, section: Section):
+    def find_assigned(self, date: datetime.date, section: Section):
         return [intern for intern in self.interns if intern.assign_of(date) == section]
 
-    def find_unassigned(self, date: date, role: Role = None):
+    def find_unassigned(self, date: datetime.date, role: Role = None):
         if role == None:
             return [intern for intern in self.interns if intern.assign_of(date) == Section.OFF]
         else:
             return [intern for intern in self.interns if intern.assign_of(date) == Section.OFF and intern.role == role]
 
-    def filter_assignable(self, date: date, section: Section, interns: list):
+    def filter_assignable(self, date: datetime.date, section: Section, interns: list):
         return [intern for intern in interns if intern.can_assign(date, section)]
