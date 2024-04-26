@@ -1,5 +1,6 @@
+import calendar
 import random
-from optimizer.calendar import MonthlyCalendar
+import datetime
 from optimizer.evaluator import Evaluator
 from optimizer.intern import NIGHT_ASSIGN_LIMIT_ER, NIGHT_ASSIGN_LIMIT_ICU, Role, Section
 from optimizer.modifier import Modifier
@@ -15,9 +16,11 @@ def main():
     max_attempt = input('Max attempt: ') if not debug else 10000
 
     # 初期シフトの生成
-    calendar = MonthlyCalendar(year, month)
-    work_schedule = Scheduler(calendar, er_count, icu_count).schedule()
-    current_score = Evaluator.evaluate(calendar, work_schedule)
+    start_date = datetime.date(year, month, 1)
+    end_date = datetime.date(year, month, calendar.monthrange(year, month)[1])
+
+    work_schedule = Scheduler(er_count, icu_count).schedule(start_date, end_date)
+    current_score = Evaluator.evaluate(work_schedule)
     print('initial score = {0}'.format(current_score))
 
     # 進化的アプローチで内容を改善
@@ -27,7 +30,7 @@ def main():
 
         # ランダム進化したシフトを生成
         modified = Modifier(work_schedule).modify()
-        new_score = Evaluator.evaluate(calendar, modified)
+        new_score = Evaluator.evaluate(modified)
 
         # スコアが同値以上ならば変化を受容
         if current_score <= new_score:
@@ -45,15 +48,14 @@ def main():
         intern.print_stats()
     print()
 
-    calendar.print_dates()
     for intern in work_schedule:
         print(intern.name, end='\t')
 
-        for day in range(1, calendar.number_of_days() + 1):
-            section = intern.assign_of(day)
+        for date in intern.get_work_schedule_range():
+            section = intern.assign_of(date)
 
             # 週末は青背景
-            if calendar.is_weekend(day):
+            if date.weekday() in [5, 6]:
                 print('\033[44m', end='')
             # 夜勤は赤文字
             if section == Section.NER:
@@ -63,7 +65,6 @@ def main():
                 print('\033[08m', end='')
             print('{:4}'.format(section.name), end='\t')
             print('\033[0m', end='')
-            day += 1
         print()
 
     print()
