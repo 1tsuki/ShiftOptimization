@@ -3,15 +3,15 @@ import datetime
 from optimizer.evaluator import Evaluator
 from optimizer.intern import NIGHT_ASSIGN_LIMIT_ER, NIGHT_ASSIGN_LIMIT_ICU, Role, Section
 from optimizer.modifier import Modifier
-from optimizer.scheduler import Scheduler
+from optimizer.scheduler import PaidTimeOffRequest, Scheduler
 
 
-def main(year: int, month: int, er_count: int, icu_count: int, max_attempt: int):
+def main(year: int, month: int, er_count: int, icu_count: int, max_attempt: int, pto_requests: list[PaidTimeOffRequest]):
     # 初期シフトの生成
     start_date = datetime.date(year, month, 1)
     end_date = start_date + datetime.timedelta(days=calendar.monthrange(year, month)[1])
 
-    work_schedule = Scheduler(er_count, icu_count).schedule(start_date, end_date)
+    work_schedule = Scheduler(er_count, icu_count, pto_requests).schedule(start_date, end_date)
     current_score = Evaluator.evaluate(work_schedule)
     print('initial score = {0}'.format(current_score))
 
@@ -59,6 +59,8 @@ def main(year: int, month: int, er_count: int, icu_count: int, max_attempt: int)
                 print('\033[44m', end='')
             if section == Section.NER: # 夜勤は赤文字
                 print('\033[31m', end='')
+            if section == Section.PTO: # 有給は青文字
+                print('\033[34m', end='')
             if section == Section.OFF: # オフ日は非表示
                 print('\033[08m', end='')
             print('{:4}'.format(section.name), end='\t')

@@ -9,7 +9,7 @@ class Modifier:
 
     def modify(self):
         date = random.choice(self.interns[0].get_work_schedule_range())
-        section = random.choice([section for section in list(Section) if section != Section.OFF])
+        section = random.choice([section for section in list(Section) if section not in [Section.OFF, Section.PTO]])
 
         role = None if section == Section.NER else Role.ICU if section == Section.ICU else Role.ER
 

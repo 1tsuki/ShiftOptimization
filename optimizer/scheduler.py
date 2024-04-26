@@ -1,3 +1,4 @@
+from copy import deepcopy
 import random
 import datetime
 from enum import Enum
@@ -26,17 +27,35 @@ class Requirements:
 
         return 0
 
+class PaidTimeOffRequest:
+    def __init__(self, role: Role, dates: list[datetime.date]):
+        self.role = role
+        self.dates = dates
+
 class Scheduler:
-    def __init__(self, er_count: int, icu_count: int):
+    def __init__(self, er_count: int, icu_count: int, pto_requests: list[PaidTimeOffRequest]):
         self.interns = list(map(lambda i: Intern("ER.{0}".format(str(i)), Role.ER), range(1, er_count + 1)))
         self.interns += list(map(lambda i: Intern("ICU.{0}".format(str(i)), Role.ICU), range(1, icu_count + 1)))
+        self.pto_requests = pto_requests
 
     def schedule(self, start_date: datetime.date, end_date: datetime.date):
         for i in range(0,10):
             try:
+                pto_requests = deepcopy(self.pto_requests)
+                er_pto_requests = [request for request in pto_requests if request.role == Role.ER]
+                icu_pto_requests = [request for request in pto_requests if request.role == Role.ICU]
+
                 for intern in self.interns:
+                    requests = []
+                    if intern.role == Role.ER and len(er_pto_requests) > 0:
+                        requests = er_pto_requests.pop().dates
+                    if intern.role == Role.ICU and len(icu_pto_requests) > 0:
+                        requests = icu_pto_requests.pop().dates
                     for date in [start_date + datetime.timedelta(days=x) for x in range((end_date-start_date).days + 1)]:
-                        intern.assign(date, Section.OFF)
+                        if date in requests:
+                            intern.assign(date, Section.PTO)
+                        else:
+                            intern.assign(date, Section.OFF)
                 self.assign(start_date, end_date)
             except Exception:
                 print('failed to schedule initial work schedule, retrying... count:{0}'.format(i + 1))
