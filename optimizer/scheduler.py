@@ -58,7 +58,7 @@ class Scheduler:
                             intern.assign(date, Section.OFF)
                 self.assign(start_date, end_date)
             except Exception:
-                print('failed to schedule initial work schedule, retrying... count:{0}'.format(i + 1))
+                print('failed to generate initial work schedule, retrying... count:{0}'.format(i + 1))
                 continue
             break
 

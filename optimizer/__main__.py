@@ -17,7 +17,8 @@ if __name__ == '__main__':
     from .cli import main
     # 有給取得希望日を設定
     pto_requests = [
-        PaidTimeOffRequest(Role.ER, [datetime.date(2024, 4, 5), datetime.date(2024, 4, 7)]),
+        PaidTimeOffRequest(Role.ER, [datetime.date(2024, 4, 5), datetime.date(2024, 4, 6)]),
         PaidTimeOffRequest(Role.ICU, [datetime.date(2024, 4, 1), datetime.date(2024, 4, 2)]),
+        PaidTimeOffRequest(Role.ICU, [datetime.date(2024, 4, 15), datetime.date(2024, 4, 16)]),
     ]
     main(args.year, args.month, args.er_count, args.icu_count, args.max_attempt, pto_requests)
