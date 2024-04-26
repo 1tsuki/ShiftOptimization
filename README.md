@@ -12,6 +12,7 @@ Python3 実行環境が必要
   - `--er 15` or `-e 15`
   - `--icu 5` or `-i 5`
   - `--attempt 1000` or `-a 1000`
+- コマンド実行例 `python3 -m optimizer -y 2024 -m 4 -e 15 -i 5 -a 10000`
 
 ## Development
 
