@@ -12,7 +12,7 @@ def main():
     month = input('Month: ') if not debug else 4
     er_count = input('ER count: ') if not debug else 14
     icu_count = input('ICU count: ') if not debug else 6
-    max_attempt = input('Max attempt: ') if not debug else 10000
+    max_attempt = input('Max attempt: ') if not debug else 1000
 
     # 初期シフトの生成
     start_date = datetime.date(year, month, 1)
@@ -50,10 +50,10 @@ def main():
     is_first = True
     for date in work_schedule[0].get_work_schedule_range():
         if is_first:
-            print('{0}月'.format(date.month), end='\t')
+            print(date.strftime('%b'), end='\t')
             is_first = False
 
-        print(date.day, end='\t')
+        print(date.strftime('%d(%a)'), end='\t')
     print()
 
     for intern in work_schedule:
