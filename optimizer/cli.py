@@ -10,8 +10,8 @@ def main():
     debug = True
     year = input('Year: ') if not debug else 2024
     month = input('Month: ') if not debug else 4
-    er_count = input('ER count: ') if not debug else 14
-    icu_count = input('ICU count: ') if not debug else 6
+    er_count = input('ER count: ') if not debug else 15
+    icu_count = input('ICU count: ') if not debug else 5
     max_attempt = input('Max attempt: ') if not debug else 1000
 
     # 初期シフトの生成
