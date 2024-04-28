@@ -1,7 +1,7 @@
 import argparse
 import datetime
 
-from optimizer.intern import Role
+from optimizer.workSchedule import Role
 from optimizer.scheduler import PaidTimeOffRequest
 
 parser = argparse.ArgumentParser()
