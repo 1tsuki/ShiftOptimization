@@ -40,7 +40,7 @@ class Scheduler:
 
     def schedule(self, first_date: datetime.date, last_date: datetime.date):
         # 初期スケジュールの生成に失敗する事があるため、10回上限でリトライを行う
-        for i in range(0, 10):
+        for i in range(0, 10000):
             try:
                 # 有給取得希望日を先んじて割り当て
                 pto_requests = deepcopy(self.pto_requests)
@@ -49,9 +49,9 @@ class Scheduler:
                 for workSchedule in self.workSchedules:
                     requests = []
                     if workSchedule.role == Role.ER and len(er_pto_requests) > 0:
-                        requests = er_pto_requests.pop().dates
+                        requests = er_pto_requests.pop(0).dates
                     if workSchedule.role == Role.ICU and len(icu_pto_requests) > 0:
-                        requests = icu_pto_requests.pop().dates
+                        requests = icu_pto_requests.pop(0).dates
 
                     for date in [first_date + datetime.timedelta(days=x) for x in range((last_date - first_date).days + 1)]:
                         if date in requests:
