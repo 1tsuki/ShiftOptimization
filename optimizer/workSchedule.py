@@ -144,7 +144,7 @@ class WorkSchedule:
             if section == Section.NER: # 夜勤は赤文字
                 print('\033[31m', end='')
             if section == Section.PTO: # 有給は青文字
-                print('\033[34m', end='')
+                print('\033[36m', end='')
             if section == Section.OFF: # オフ日は非表示
                 print('\033[08m', end='')
             print('{0:4}'.format(section.name), end='\t')
